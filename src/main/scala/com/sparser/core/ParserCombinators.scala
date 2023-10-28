@@ -36,8 +36,8 @@ trait ParserCombinators[Parser[+_]] {
       case Nil => succeed(Nil)
     }
 
-  def skipLeftL[B](p: Parser[Any], p2: => Seq[Parser[B]]): Parser[Seq[B]] =
-    map2(slice(p), sequence(p2))((_, b) => b)
+  def skipLeftSeq[A, B](p: Seq[Parser[A]], p2: => Parser[B]): Parser[B] =
+    map2(slice(sequence(p)), p2)((_, b) => b)
 
   def skipRight[B](p: Parser[B], p2: Parser[Any]): Parser[B] =
     map2(p, slice(p2))((a, _) => a)
@@ -60,6 +60,8 @@ trait ParserCombinators[Parser[+_]] {
   implicit def operators[A](p: Seq[Parser[A]]): ParserOpsSeq[Parser, A] = ParserOpsSeq(p, this)
 
   implicit def string(s: String): Parser[String]
+
+  implicit def toSeq[A](s: Parser[A]): Parser[Seq[A]] = s.map(Seq(_))
 
   implicit def regex(r: Regex): Parser[String]
 }

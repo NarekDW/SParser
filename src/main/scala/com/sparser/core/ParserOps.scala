@@ -21,5 +21,5 @@ protected case class ParserOps[Parser[+_], A](p: Parser[A], pc: ParserCombinator
 protected case class ParserOpsSeq[Parser[+_], A](pl: Seq[Parser[A]], pc: ParserCombinators[Parser]) {
   def **(p2: Parser[A]): Seq[Parser[A]] = p2 +: pl
 
-  def *>[B](p2: => Parser[B]): Parser[Seq[A]] = pc.skipLeftL(p2, pl)
+  def *>[B](p2: => Parser[B]): Parser[B] = pc.skipLeftSeq(pl, p2)
 }

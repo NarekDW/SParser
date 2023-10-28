@@ -72,7 +72,7 @@ object SParser extends ParserCombinators[Parser] {
 
   implicit def execOps[A](parsers: Seq[Parser[A]]): ParserExecutionOps[A] = new ParserExecutionOps(parsers)
 
-  implicit def execOpsStr(parser: Parser[String]): ParserExecutionOpsStr = new ParserExecutionOpsStr(parser)
+  implicit def execOpsStr[A](parser: Parser[A]): ParserExecutionOpsStr[A] = new ParserExecutionOpsStr(parser)
 
   class ParserExecutionOps[A](parsers: Seq[Parser[A]]) {
     def either(input: String): Either[ParseError, String] = sp.either(parsers)(input)
@@ -82,6 +82,6 @@ object SParser extends ParserCombinators[Parser] {
     def run(input: String, separator: String = ""): String = sp.run(parsers)(input)(separator)
   }
 
-  class ParserExecutionOpsStr(parser: Parser[String]) extends ParserExecutionOps(parsers = Seq(parser))
+  class ParserExecutionOpsStr[A](parser: Parser[A]) extends ParserExecutionOps(parsers = Seq(parser))
 }
 
