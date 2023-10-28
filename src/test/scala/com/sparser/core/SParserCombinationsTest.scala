@@ -18,13 +18,16 @@ class SParserCombinationsTest extends AnyFunSuite {
   }
 
   test("Combinations test *>") {
-    val input = "ab45za6as"
+    val input = "text45other6some"
 
     val parser: Parser[String] = lower *> digits(1, 2)
     assert(parser.run(input) == "45")
 
-    val parser2 = lower ** digits(1, 2) *> lower ** digit
-    assert(parser2.run(input) == "za6")
+    val parser2: Seq[Parser[String]] = parser *> lower ** digit
+    assert(parser2.run(input) == "other6")
+
+    val parser3: Parser[String] = parser2 *> lower
+    assert(parser3.run(input) == "some")
   }
 
 }
