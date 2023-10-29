@@ -30,4 +30,18 @@ class SParserCombinationsTest extends AnyFunSuite {
     assert(parser3.run(input) == "some")
   }
 
+  test("Monad laws") {
+    val p1 = digit.flatMap(n => string("a").replicateM(n.toInt)).flatMap(x => string(x.mkString))
+    val p2 = digit.flatMap(n => string("a").replicateM(n.toInt).flatMap(x => string(x.mkString)))
+
+    val input = "2aaaa"
+    val expected = "aa"
+    assert(p1.run(input) == expected)
+    assert(p2.run(input) == expected)
+
+    val succeedFunc = SParser.succeed[String] _
+    assert(digit.flatMap(succeedFunc).run("1") == "1")
+    assert(succeedFunc("1").flatMap(_ => digit).run("1") == "1")
+  }
+
 }

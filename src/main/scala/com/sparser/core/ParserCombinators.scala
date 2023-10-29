@@ -3,14 +3,8 @@ package com.sparser.core
 import scala.language.implicitConversions
 import scala.util.matching.Regex
 
-trait ParserCombinators[Parser[+_]] {
+trait ParserCombinators[Parser[+_]] extends Monad[Parser] {
   self =>
-  def succeed[A](a: A): Parser[A]
-
-  def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
-
-  def map[A, B](a: Parser[A])(f: A => B): Parser[B] = a.flatMap(x => succeed(f(x)))
-
   def or[A](s1: Parser[A], s2: => Parser[A]): Parser[A]
 
   def slice[A](p: Parser[A]): Parser[String]
@@ -23,18 +17,8 @@ trait ParserCombinators[Parser[+_]] {
 
   val whitespace: Parser[String] = "\\s*".r
 
-  def map2[A, B, C](p: Parser[A], p2: => Parser[B])(f: (A, B) => C): Parser[C] =
-    p.flatMap(a => p2.map(b => f(a, b)))
-
   def skipLeft[B](p: Parser[Any], p2: => Parser[B]): Parser[B] =
     map2(slice(p), p2)((_, b) => b)
-
-  // TODO: move to Monad
-  def sequence[A](lma: Seq[Parser[A]]): Parser[Seq[A]] =
-    lma match {
-      case x :: xs => flatMap(sequence(xs))(l => map(x)(_ +: l))
-      case Nil => succeed(Nil)
-    }
 
   def skipLeftSeq[A, B](p: Seq[Parser[A]], p2: => Parser[B]): Parser[B] =
     map2(slice(sequence(p)), p2)((_, b) => b)

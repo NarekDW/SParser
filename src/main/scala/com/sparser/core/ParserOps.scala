@@ -16,6 +16,9 @@ protected case class ParserOps[Parser[+_], A](p: Parser[A], pc: ParserCombinator
   def <*(p2: => Parser[Any]): Parser[A] = pc.skipRight(p, p2)
 
   def times(n: Int): Parser[List[A]] = pc.times(n, p)
+
+  def replicateM(n: Int): Parser[Seq[A]] =
+    pc.replicateM(n, p)
 }
 
 protected case class ParserOpsSeq[Parser[+_], A](pl: Seq[Parser[A]], pc: ParserCombinators[Parser]) {

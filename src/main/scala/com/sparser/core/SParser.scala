@@ -7,7 +7,8 @@ import scala.util.matching.Regex
 
 object SParser extends ParserCombinators[Parser] {
   sp =>
-  override def succeed[A](a: A): Parser[A] = _ => Success(a, 0)
+  override def succeed[A](a: A): Parser[A] =
+    _ => Success(a, 0)
 
   override def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B] =
     s => p(s) match {
