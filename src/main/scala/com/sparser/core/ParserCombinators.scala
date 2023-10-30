@@ -32,12 +32,6 @@ trait ParserCombinators[Parser[+_]] extends Monad[Parser] {
 
   val anyNonDigit: Parser[String] = ("\\D*").r
 
-  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
-    if (n > 0) map2(p, listOfN(n - 1, p))(_ :: _) else succeed(Nil)
-
-  def times[A](n: Int, p: Parser[A]): Parser[List[A]] =
-    listOfN(n, p)
-
   // implicits
   implicit def operators[A](p: Parser[A]): ParserOps[Parser, A] = ParserOps(p, this)
 

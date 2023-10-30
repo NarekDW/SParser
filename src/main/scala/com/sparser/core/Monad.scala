@@ -26,7 +26,7 @@ trait Monad[F[_]] extends Functor[F] {
     case Nil => succeed(Nil)
   }
 
-  def replicateM[A](n: Int, ma: F[A]): F[Seq[A]] =
+  def replicate[A](n: Int, ma: F[A]): F[Seq[A]] =
     sequence(List.fill(n)(ma))
 
   def filterM[A](ms: Seq[A])(f: A => F[Boolean]): F[Seq[A]] = {
