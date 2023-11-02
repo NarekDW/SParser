@@ -36,5 +36,27 @@ class SParserFunctionsTest extends AnyFunSuite {
       _ = assert(l == 4242424242421111234L)
     } yield ()
     combination.run("42.24 4242424242421111234")
+
+    val mathOps = for {
+      i1 <- integer
+      _ <- whitespace
+      i2 <- integer
+      _ <- whitespace
+      i3 <- integer
+    } yield (i1 - i2) * i3
+
+    assert(mathOps.exec("55 15 3") == 120)
+
+    val mathOps2 = for {
+      _ <- string("(")
+      i1 <- integer
+      _ <- string("-")
+      i2 <- integer
+      _ <- string(")")
+      _ <- string("*")
+      i3 <- integer
+    } yield (i1 - i2) * i3
+
+    assert(mathOps2.exec("(55-15)*3") == 120)
   }
 }
