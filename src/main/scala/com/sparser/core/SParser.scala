@@ -83,6 +83,11 @@ object SParser extends ParserCombinators[Parser] {
     def run(input: String, separator: String = ""): String = sp.run(parsers)(input)(separator)
   }
 
-  class ParserExecutionOpsStr[A](parser: Parser[A]) extends ParserExecutionOps(parsers = Seq(parser))
+  class ParserExecutionOpsStr[A](parser: Parser[A]) extends ParserExecutionOps(parsers = Seq(parser)) {
+    def exec(input: String): A = sp.exec(Seq(parser))(input)(_.extract.map(_.head)) match {
+      case Left(parseError: ParseError) => throw new RuntimeException(parseError.toString)
+      case Right(a) => a
+    }
+  }
 }
 

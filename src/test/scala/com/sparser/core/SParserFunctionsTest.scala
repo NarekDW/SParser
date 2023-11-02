@@ -20,4 +20,21 @@ class SParserFunctionsTest extends AnyFunSuite {
     val simpleStringParser = string("abc")
     assertThrows[RuntimeException](simpleStringParser.run("abdc"))
   }
+
+  test("numbers test") {
+    assert(integer.exec("42") == 42)
+    assert(long.exec("4242424242421111234") == 4242424242421111234L)
+
+    val combination = for {
+      i <- integer
+      _ = assert(i == 42)
+      _ <- string(".")
+      i2 <- integer
+      _ = assert(i2 == 24)
+      _ <- whitespace
+      l <- long
+      _ = assert(l == 4242424242421111234L)
+    } yield ()
+    combination.run("42.24 4242424242421111234")
+  }
 }

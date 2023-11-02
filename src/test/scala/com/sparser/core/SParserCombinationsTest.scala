@@ -48,5 +48,4 @@ class SParserCombinationsTest extends AnyFunSuite {
     assert(digit.flatMap(unit).run("1") == "1")
     assert(unit("1").flatMap(_ => digit).run("1") == "1")
   }
-
 }

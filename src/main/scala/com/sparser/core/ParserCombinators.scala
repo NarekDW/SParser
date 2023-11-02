@@ -15,6 +15,10 @@ trait ParserCombinators[Parser[+_]] extends Monad[Parser] {
 
   val digitsMany: Parser[String] = (s"\\d+").r
 
+  val integer: Parser[Int] = digitsMany.map(_.toInt)
+
+  val long: Parser[Long] = digitsMany.map(_.toLong)
+
   val whitespace: Parser[String] = "\\s*".r
 
   def skipLeft[B](p: Parser[Any], p2: => Parser[B]): Parser[B] =
