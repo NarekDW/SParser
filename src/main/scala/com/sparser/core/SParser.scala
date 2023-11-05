@@ -16,6 +16,9 @@ object SParser extends ParserCombinators[Parser] {
       case f: Failure => f
     }
 
+  def map2[A, B, C](fa: Parser[A], fb: Parser[B])(f: (A, B) => C): Parser[C] =
+    fa.flatMap(a => fb.map(b => f(a, b)))
+
   override def or[A](s1: Parser[A], s2: => Parser[A]): Parser[A] = s =>
     s1(s) match {
       case Failure(_) => s2(s)

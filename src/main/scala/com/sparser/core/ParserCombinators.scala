@@ -3,7 +3,9 @@ package com.sparser.core
 import scala.language.implicitConversions
 import scala.util.matching.Regex
 
-trait ParserCombinators[Parser[+_]] extends Monad[Parser] {
+trait ParserCombinators[Parser[+_]]
+  extends Monad[Parser]
+    with Applicative[Parser] {
   self =>
   def or[A](s1: Parser[A], s2: => Parser[A]): Parser[A]
 
