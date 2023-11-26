@@ -11,9 +11,14 @@ trait ParserCombinators[Parser[+_]]
 
   def slice[A](p: Parser[A]): Parser[String]
 
+  def withLabel[A](msg: String)(p: Parser[A]): Parser[A]
+
   val digit: Parser[String] = digits(1, 1)
 
-  def digits(from: Int, to: Int): Parser[String] = (s"\\d{$from,$to}").r
+  def digits(from: Int, to: Int): Parser[String] =
+    withLabel(s"digits($from, $to)") {
+      (s"\\d{$from,$to}").r
+    }
 
   val digitsMany: Parser[String] = (s"\\d+").r
 

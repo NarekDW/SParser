@@ -30,6 +30,11 @@ object ReferenceTypes {
       case Success(a, m) => Success(a, n + m)
       case _ => this
     }
+
+    def mapError(f: ParseError => ParseError): Result[A] = this match {
+      case Failure(e) => Failure(f(e))
+      case _ => this
+    }
   }
 
   case class Success[+A](get: A, length: Int) extends Result[A]
@@ -51,7 +56,6 @@ object ReferenceTypes {
 }
 
 case class Location(input: String, offset: Int = 0) {
-
   lazy val line = input.slice(0, offset + 1).count(_ == '\n') + 1
   lazy val col = input.slice(0, offset + 1).lastIndexOf('\n') match {
     case -1 => offset + 1
@@ -59,53 +63,29 @@ case class Location(input: String, offset: Int = 0) {
   }
 
   def toError(msg: String): ParseError =
-    ParseError(List((this, msg)))
+    ParseError(this, msg)
 
   def advanceBy(n: Int): Location =
     copy(offset = offset + n)
 
-  def currentLine: String =
-    if (input.length > 1)
-      input.linesIterator.drop(line - 1).next()
-    else ""
+  lazy val currentLine: String =
+    if (input.length > 1) input.linesIterator.drop(line - 1).next() else ""
 
-  def columnCaret = (" " * (col - 1)) + "^"
+  def columnCaret: String = {
+    val caretPosition = col - 1
+    (" " * caretPosition) + "^"
+  }
 }
 
-case class ParseError(stack: List[(Location, String)] = List()) {
-  def push(loc: Location, msg: String): ParseError =
-    copy(stack = (loc, msg) :: stack)
-
+case class ParseError(location: Location, label: String) {
   def label(s: String): ParseError =
-    ParseError(latestLoc.map((_, s)).toList)
+    copy(label = s)
 
-  def latest: Option[(Location, String)] =
-    stack.lastOption
-
-  def latestLoc: Option[Location] =
-    latest map (_._1)
-
-  /**
-   * Display collapsed error stack - any adjacent stack elements with the
-   * same location are combined on one line. For the bottommost error, we
-   * display the full line, with a caret pointing to the column of the error.
-   */
+  /** Display the error full line, with a caret pointing to the column of the error. */
   override def toString: String =
-    if (stack.isEmpty) "no error message"
-    else {
-      val collapsed = collapseStack(stack)
-      val context =
-        collapsed.lastOption.map("\n\n" + _._1.currentLine).getOrElse("") +
-          collapsed.lastOption.map("\n" + _._1.columnCaret).getOrElse("")
-      collapsed.map { case (loc, msg) => loc.line.toString + "." + loc.col + " " + msg }.mkString("\n") +
-        context
-    }
-
-  /* Builds a collapsed version of the given error stack -
-   * messages at the same location have their messages merged,
-   * separated by semicolons */
-  def collapseStack(s: List[(Location, String)]): List[(Location, String)] =
-    s.groupBy(_._1).
-      view.mapValues(_.map(_._2).mkString("; ")).
-      toList.sortBy(_._1.offset)
+    s"""
+       |Mismatch occurred: $label at line ${location.line} : column ${location.col}
+       |${location.currentLine}
+       |${location.columnCaret}
+       |""".stripMargin
 }

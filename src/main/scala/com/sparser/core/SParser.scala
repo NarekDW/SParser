@@ -49,6 +49,9 @@ object SParser extends ParserCombinators[Parser] {
       case f: Failure => f
     }
 
+  override def withLabel[A](msg: String)(p: Parser[A]): Parser[A] =
+    s => p(s).mapError(_.label(msg))
+
   def either[A](p: Seq[Parser[A]])(s: String): Either[ParseError, String] =
     exec(p)(s)(_.extract.map(_.mkString))
 
@@ -63,7 +66,7 @@ object SParser extends ParserCombinators[Parser] {
   def run[A](p: Seq[Parser[A]])(s: String)(separator: String): String =
     exec(p)(s) {
       _.extract match {
-        case Left(parseError: ParseError) => throw new RuntimeException(parseError.toString)
+        case Left(parseError: ParseError) => throw SParseException(parseError.toString)
         case Right(list) => list.mkString(separator)
       }
     }
